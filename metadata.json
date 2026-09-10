@@ -1,0 +1,6 @@
+{
+  "name": "HarvestPulse",
+  "description": "AI-powered Smart Agriculture Platform for Crop Recommendations, Disease Detection, Live Market Prices, and Smart Irrigation in India.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
