@@ -11,17 +11,17 @@ interface CommunityProps {
 
 export default function Community({ language, userProfileName, userProfileDistrict, userRole }: CommunityProps) {
   const [posts, setPosts] = useState<ForumPost[]>(() => {
-    const saved = localStorage.getItem("uzhavan_forum");
+    const saved = localStorage.getItem("harvestpulse_forum");
     if (saved) return JSON.parse(saved);
 
-    // High fidelity default posts from actual Tamil Nadu farmers and officers
+    // High fidelity default posts from actual farmers and officers
     return [
       {
         id: "post1",
         author: "Kathirvel Pandian",
         district: "Thanjavur",
         role: "farmer",
-        content: "Our Samba Paddy (CR 1009 Sub 1) is currently at day 55 (tillering stage). Water availability is robust from the Grand Anicut canal. Noticeable leaf folders in certain plots, planning to spray neem seed kernel extract (NSKE 5%) tomorrow morning. Any organic recommendations from fellow delta farmers?",
+        content: "Our Samba Paddy (CR 1009 Sub 1) is currently at day 55 (tillering stage). Water availability is robust from the canal. Noticeable leaf folders in certain plots, planning to spray neem seed kernel extract (NSKE 5%) tomorrow morning. Any organic recommendations from fellow delta farmers?",
         timestamp: "4 hours ago",
         likes: 12,
         likedBy: [],
@@ -34,28 +34,16 @@ export default function Community({ language, userProfileName, userProfileDistri
             timestamp: "3 hours ago"
           }
         ]
-      },
-      {
-        id: "post2",
-        author: "Meenakshi Sundaram",
-        district: "Erode",
-        role: "farmer",
-        content: "Turmeric arrivals are high at Erode yard today. Finger grade fetched up to ₹13,400/quintal. Bulb grade is stable around ₹10,500. Highly recommend delta farmers wait if possible as arrivals might tighten in August.",
-        timestamp: "Yesterday",
-        likes: 18,
-        likedBy: [],
-        comments: []
       }
     ];
   });
-
   const [newPostText, setNewPostText] = useState("");
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [selectedDistrict, setSelectedDistrict] = useState("All");
 
   const savePosts = (updatedPosts: ForumPost[]) => {
     setPosts(updatedPosts);
-    localStorage.setItem("uzhavan_forum", JSON.stringify(updatedPosts));
+    localStorage.setItem("harvestpulse_forum", JSON.stringify(updatedPosts));
   };
 
   const handleCreatePost = (e: FormEvent) => {
@@ -126,7 +114,7 @@ export default function Community({ language, userProfileName, userProfileDistri
 
   const t = {
     English: {
-      title: "Uzhavan Community Forum",
+      title: "HarvestPulse Community Forum",
       subtitle: "Share real-time crop yields, pest alerts, and market price reports with other farmers. Verified experts answer queries.",
       inputPlaceholder: "What is happening in your fields today? Share a disease warning, crop yield, or pricing updates...",
       shareBtn: "Post Discussion",

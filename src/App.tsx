@@ -18,10 +18,13 @@ import {
   Globe,
   CheckCircle,
   Smartphone,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
+  Mic,
+  Bot
 } from "lucide-react";
 
-import { FarmerProfile as ProfileType, UserRole } from "./types";
+import { FarmerProfile as ProfileType, UserRole, DiseaseDetectionResult } from "./types";
 
 // Import modules
 import Dashboard from "./components/Dashboard";
@@ -37,34 +40,78 @@ import Community from "./components/Community";
 import FarmerProfile from "./components/FarmerProfile";
 import FarmingNews from "./components/FarmingNews";
 import Analytics from "./components/Analytics";
+import FarmerAuth from "./components/FarmerAuth";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [language, setLanguage] = useState<'English' | 'Tamil'>("English");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Default farmer profile (initialized locally, updates saved in profile settings tab)
+  // Authentication State: Enforce Farmer Authentication at first
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Default farmer profile (initialized from auth session or storage)
   const [profile, setProfile] = useState<ProfileType>(() => {
     const saved = localStorage.getItem("farmer_profile");
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // pass
+      }
+    }
     return {
-      id: "farmer1",
-      name: "Ranganathan Swamy",
-      mobile: "9843211560",
+      id: "HP-FARM-04921",
+      name: "Sugesh",
       district: "Thanjavur",
-      village: "Alampatti",
-      farmSize: 1.5,
+      village: "Papanasam",
+      farmSize: 2.5,
       soilType: "Clayey Soil",
       irrigationType: "Drip Irrigation",
-      mainCrops: ["Paddy", "Turmeric"],
+      mainCrops: ["Paddy (Rice)", "Turmeric"],
       role: "farmer"
     };
   });
 
-  // Keep state sync
+  // Crop health state dynamically linked to disease detector
+  const [latestDiseaseReport, setLatestDiseaseReport] = useState<DiseaseDetectionResult | null>(() => {
+    try {
+      const saved = localStorage.getItem("harvestpulse_latest_disease_report");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Keep state sync with storage
   useEffect(() => {
-    localStorage.setItem("farmer_profile", JSON.stringify(profile));
-  }, [profile]);
+    if (isAuthenticated) {
+      localStorage.setItem("farmer_profile", JSON.stringify(profile));
+      localStorage.setItem("harvestpulse_auth_farmer", JSON.stringify(profile));
+    }
+  }, [profile, isAuthenticated]);
+
+  const handleLoginSuccess = (authenticatedProfile: ProfileType) => {
+    setProfile(authenticatedProfile);
+    setIsAuthenticated(true);
+    setActiveTab("dashboard");
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("harvestpulse_auth_farmer");
+    setIsAuthenticated(false);
+  };
+
+  // If not authenticated, render Farmer Authentication Screen first
+  if (!isAuthenticated) {
+    return (
+      <FarmerAuth
+        language={language}
+        setLanguage={setLanguage}
+        onLogin={handleLoginSuccess}
+      />
+    );
+  }
 
   const navItems = [
     { id: "dashboard", labelEn: "Overview Dashboard", labelTa: "கண்காணிப்பு பலகை", icon: LayoutDashboard },
@@ -74,10 +121,10 @@ export default function App() {
     { id: "prices", labelEn: "eNAM Market Prices", labelTa: "சந்தை விலை நிலவரம்", icon: TrendingUp },
     { id: "soil", labelEn: "Soil Health Card", labelTa: "மண் பரிசோதனை", icon: HelpCircle },
     { id: "irrigation", labelEn: "Water Scheduler", labelTa: "நீர் பாசன மேலாண்மை", icon: Droplets },
-    { id: "schemes", labelEn: "Subsidy & Schemes", labelTa: "அரசு சலுகைகள்", icon: Bookmark },
-    { id: "assistant", labelEn: "Uzhavan AI Chat", labelTa: "உழவன் AI அரட்டை", icon: MessageSquare, badge: "Voice" },
+    { id: "schemes", labelEn: "Subsidy & Schemes", labelTa: "விவசாய சலுகைகள்", icon: Bookmark },
+    { id: "assistant", labelEn: "Uzhavan AI Farmer", labelTa: "உழவன் AI விவசாயி", icon: Bot, badge: "AI Voice" },
     { id: "community", labelEn: "Farmers Forum", labelTa: "விவசாயிகள் மன்றம்", icon: MessageSquare },
-    { id: "news", labelEn: "TNAU News Desk", labelTa: "வேளாண் செய்திகள்", icon: Newspaper },
+    { id: "news", labelEn: "AgriTech News Feed", labelTa: "வேளாண் செய்திகள்", icon: Newspaper },
     { id: "analytics", labelEn: "Sales & Yield ROI", labelTa: "வருவாய் பகுப்பாய்வு", icon: BarChart3 },
     { id: "profile", labelEn: "Digital Farmer ID", labelTa: "விவசாயி டிஜிட்டல் அட்டை", icon: User }
   ];
@@ -102,28 +149,88 @@ export default function App() {
               <Sprout className="w-5 h-5 text-lime-300 animate-pulse" />
             </div>
             <div>
-              <span className="font-display font-extrabold text-base text-emerald-950 dark:text-white leading-none block">HarvestPulse</span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider uppercase block">AI Smart Agriculture</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-display font-extrabold text-base text-emerald-950 dark:text-white leading-none">HarvestPulse</span>
+                <span className="bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold px-1.5 py-0.5 rounded border border-emerald-500/30">V3</span>
+              </div>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider uppercase block mt-0.5">Smart Agriculture Platform</span>
             </div>
           </div>
         </div>
 
         {/* Global Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Offline local sync badge */}
           <div className="hidden md:flex items-center gap-1 text-[10px] bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-full font-bold text-slate-500">
             <Smartphone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>PWA Offline Cache Active</span>
+            <span>PWA Active</span>
           </div>
+
+          {/* Active Farmer Pill */}
+          <button
+            onClick={() => setActiveTab("profile")}
+            className="hidden sm:flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/20 px-2.5 py-1 rounded-xl text-xs hover:border-emerald-500/40 transition cursor-pointer"
+            title="View Farmer Profile"
+          >
+            <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
+              {profile.name.slice(0, 1)}
+            </div>
+            <div className="text-left">
+              <span className="font-bold text-emerald-950 dark:text-emerald-200 block text-[11px] leading-tight truncate max-w-[120px]">
+                {profile.name}
+              </span>
+              <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block leading-none">
+                {profile.district}
+              </span>
+            </div>
+          </button>
+
+          {/* Uzhavan AI Farmer Icon & Voice Agronomist at Top */}
+          <button
+            onClick={() => {
+              setActiveTab("assistant");
+              setIsMobileMenuOpen(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-sm ${
+              activeTab === "assistant"
+                ? "bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 text-white shadow-emerald-700/20 ring-2 ring-emerald-400"
+                : "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/20"
+            }`}
+            title={language === "English" ? "Uzhavan AI Farmer: AI Agronomist & Voice Assistant" : "உழவன் AI விவசாயி: வேளாண் ஆலோசகர் & குரல்"}
+          >
+            <div className="relative flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-lime-300 animate-ping" />
+            </div>
+            <div className="flex flex-col text-left leading-none">
+              <div className="flex items-center gap-1">
+                <span className="font-extrabold text-xs tracking-tight">Uzhavan AI</span>
+                <span className="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-white/25 text-lime-100">Farmer</span>
+              </div>
+              <span className="text-[9px] text-emerald-100 opacity-90 hidden sm:inline mt-0.5">உழவன் AI விவசாயி</span>
+            </div>
+          </button>
 
           {/* Language Switcher */}
           <button 
             onClick={() => setLanguage(language === "English" ? "Tamil" : "English")}
-            className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
             <Globe className="w-3.5 h-3.5" />
             <span>{language === "English" ? "தமிழ்" : "English"}</span>
+          </button>
+
+          {/* Switch Farmer / Re-Authenticate Button */}
+          <button
+            onClick={handleSignOut}
+            className="px-2.5 py-1.5 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 bg-slate-100 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/40 rounded-xl transition cursor-pointer border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800 text-xs font-semibold flex items-center gap-1.5"
+            title={language === "English" ? "Switch Farmer / Re-Authenticate" : "விவசாயியை மாற்று / மீண்டும் உள்நுழை"}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">{language === "English" ? "Switch Farmer" : "விவசாயி மாற்று"}</span>
           </button>
         </div>
       </header>
@@ -178,14 +285,26 @@ export default function App() {
           </div>
 
           {/* Connected User Badge Footer inside sidebar */}
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center gap-2.5 text-xs text-slate-800 dark:text-slate-200">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
-              <User className="w-4 h-4" />
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center justify-between gap-2 text-xs text-slate-800 dark:text-slate-200">
+            <div className="flex items-center gap-2.5 truncate">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="truncate">
+                <span className="font-extrabold block truncate leading-none">{profile.name}</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-0.5 font-bold truncate">
+                  {profile.id || profile.district}
+                </span>
+              </div>
             </div>
-            <div className="truncate">
-              <span className="font-extrabold block truncate leading-none">{profile.name}</span>
-              <span className="text-[10px] text-slate-400 block mt-0.5 font-bold truncate">{profile.district}, TN</span>
-            </div>
+
+            <button
+              onClick={handleSignOut}
+              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition cursor-pointer shrink-0"
+              title={language === "English" ? "Sign Out" : "வெளியேறு"}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </aside>
 
@@ -203,7 +322,12 @@ export default function App() {
             
             {/* Direct module routing */}
             {activeTab === "dashboard" && (
-              <Dashboard profile={profile} setActiveTab={setActiveTab} language={language} />
+              <Dashboard 
+                profile={profile} 
+                setActiveTab={setActiveTab} 
+                language={language} 
+                latestDiseaseReport={latestDiseaseReport}
+              />
             )}
             
             {activeTab === "recommendation" && (
@@ -211,7 +335,11 @@ export default function App() {
             )}
 
             {activeTab === "disease" && (
-              <DiseaseDetection language={language} />
+              <DiseaseDetection 
+                language={language} 
+                latestReport={latestDiseaseReport}
+                onReportUpdate={setLatestDiseaseReport}
+              />
             )}
 
             {activeTab === "weather" && (
@@ -235,7 +363,18 @@ export default function App() {
             )}
 
             {activeTab === "assistant" && (
-              <AIAssistant language={language} userDistrict={profile.district} />
+              <AIAssistant 
+                language={language} 
+                userDistrict={profile.district}
+                onNavigate={(tabId: string) => {
+                  setActiveTab(tabId);
+                  setIsMobileMenuOpen(false);
+                }}
+                activeTab={activeTab}
+                farmerName={profile.name}
+                farmerSoil={profile.soilType}
+                farmerAcres={profile.farmSize}
+              />
             )}
 
             {activeTab === "community" && (

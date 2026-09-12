@@ -41,20 +41,20 @@ export default function CropRecommendation({ language, userDistrict, userSoil }:
       risk: "Risk Level",
       fertilizers: "Fertilizers Recommended",
       irrigation: "Irrigation Schedule",
-      aiReason: "Uzhavan AI Reasoning",
+      aiReason: "HarvestPulse AI Agronomic Reasoning",
     },
     Tamil: {
       title: "பயிர் பரிந்துரை இயந்திரம்",
       subtitle: "உங்கள் மண் வகை, மாவட்ட வானிலை மற்றும் நீர் ஆதாரங்களின் அடிப்படையில் உகந்த பயிர் பரிந்துரைகள்.",
       formHeader: "வயல் தரவுகள்",
-      districtLabel: "மாவட்டம் (தமிழ்நாடு)",
+      districtLabel: "மாவட்டம்",
       soilLabel: "மண் வகை",
       seasonLabel: "பயிர் பருவம்",
       farmSizeLabel: "நிலத்தின் அளவு (ஏக்கர்)",
       waterLabel: "நீர் ஆதாரம் & வசதி",
       budgetLabel: "முதலீட்டுத் திறன்",
       buttonText: "பரிந்துரைகளைப் பெறுக",
-      loadingText: "உழவன் AI உங்கள் தரவுகளை ஆராய்கிறது...",
+      loadingText: "ஹார்வெஸ்ட்பல்ஸ் AI உங்கள் தரவுகளை ஆராய்கிறது...",
       recommendedCrops: "பரிந்துரைக்கப்பட்ட பயிர்கள்",
       growingDuration: "பயிர் காலம்",
       expectedYield: "எதிர்பார்க்கும் விளைச்சல்",
@@ -63,7 +63,7 @@ export default function CropRecommendation({ language, userDistrict, userSoil }:
       risk: "ஆபத்து நிலை",
       fertilizers: "பரிந்துரைக்கப்படும் உரங்கள்",
       irrigation: "நீர் பாசன அட்டவணை",
-      aiReason: "உழவன் AI விவசாய விளக்கம்",
+      aiReason: "ஹார்வெஸ்ட்பல்ஸ் AI விவசாய விளக்கம்",
     }
   }[language];
 

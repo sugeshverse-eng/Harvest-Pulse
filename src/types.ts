@@ -26,22 +26,36 @@ export interface WeatherDay {
   tempMin: number;
   tempMax: number;
   condition: string;
+  conditionTa?: string;
   icon: string;
   rainProb: number;
+  precipitationMm?: number;
+  uvIndex?: number;
 }
 
 export interface WeatherInfo {
   temp: number;
+  apparentTemp?: number;
   humidity: number;
   rainProb: number;
+  precipitationMm?: number;
   windSpeed: number;
+  windDirection?: string;
   uvIndex: number;
   pressure: number;
   sunrise: string;
   sunset: string;
   condition: string;
+  conditionTa?: string;
   forecast: WeatherDay[];
   alerts: string[];
+  isVerified: boolean;
+  dataSource: string;
+  lastUpdated: string;
+  lastUpdatedFormatted?: string;
+  stationName?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface MarketPrice {
@@ -86,6 +100,34 @@ export interface DiseaseDetectionResult {
   recoveryTime: string;
   estimatedCost: string; // e.g. "Rs. 800 - 1,200 / acre"
   nearbyAgriOffice: string;
+  crop?: string;
+  scannedAt?: string;
+  healthScore?: number;
+  imageUrl?: string;
+}
+
+export interface DistrictWeatherSummary {
+  district: string;
+  districtTa: string;
+  zone: string;
+  zoneTa: string;
+  temp: number;
+  tempMin: number;
+  tempMax: number;
+  apparentTemp?: number;
+  condition: string;
+  conditionTa: string;
+  icon: string;
+  humidity: number;
+  rainProb: number;
+  precipitationMm: number;
+  windSpeed: number;
+  windDirection?: string;
+  uvIndex: number;
+  alert: string;
+  station: string;
+  isVerified: boolean;
+  lastUpdated: string;
 }
 
 export interface SoilReport {
@@ -101,7 +143,7 @@ export interface Scheme {
   id: string;
   title: string;
   titleTa?: string;
-  type: 'Central' | 'Tamil Nadu State';
+  type: 'Central' | 'State' | string;
   description: string;
   descriptionTa?: string;
   eligibility: string[];

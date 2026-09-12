@@ -1,5 +1,5 @@
-import { useState, FormEvent } from "react";
-import { User, ShieldCheck, Mail, MapPin, Database, Award, RefreshCw, QrCode, ClipboardList } from "lucide-react";
+import { useState, useEffect, FormEvent } from "react";
+import { User, ShieldCheck, Mail, MapPin, Database, Award, RefreshCw, QrCode, ClipboardList, CheckCircle2 } from "lucide-react";
 import { FarmerProfile as FarmerProfileType, UserRole } from "../types";
 
 interface FarmerProfileProps {
@@ -9,51 +9,69 @@ interface FarmerProfileProps {
 }
 
 export default function FarmerProfile({ language, profile, setProfile }: FarmerProfileProps) {
-  const [name, setName] = useState(profile.name);
-  const [district, setDistrict] = useState(profile.district);
-  const [soilType, setSoilType] = useState(profile.soilType);
-  const [farmSize, setFarmSize] = useState(profile.farmSize);
-  const [mobile, setMobile] = useState(profile.mobile || "9842100000");
-  const [aadhaar, setAadhaar] = useState(profile.aadhaar || "XXXX-XXXX-1234");
+  const [name, setName] = useState(profile?.name || "");
+  const [district, setDistrict] = useState(profile?.district || "Thanjavur");
+  const [village, setVillage] = useState(profile?.village || "Papanasam");
+  const [soilType, setSoilType] = useState(profile?.soilType || "Clayey Soil");
+  const [farmSize, setFarmSize] = useState(profile?.farmSize || 2.5);
+  const [aadhaar, setAadhaar] = useState(profile?.aadhaar || "XXXX-XXXX-1234");
   
   const [saving, setSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Synchronize state whenever profile prop updates (e.g., from authentication)
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name || "");
+      setDistrict(profile.district || "Thanjavur");
+      setVillage(profile.village || "Papanasam");
+      setSoilType(profile.soilType || "Clayey Soil");
+      setFarmSize(profile.farmSize ?? 2.5);
+      setAadhaar(profile.aadhaar || "XXXX-XXXX-1234");
+    }
+  }, [profile]);
+
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    const updated: FarmerProfileType = {
+      ...profile,
+      name: name.trim() || profile.name,
+      district,
+      village,
+      soilType,
+      farmSize,
+      aadhaar
+    };
+
+    localStorage.setItem("farmer_profile", JSON.stringify(updated));
+    localStorage.setItem("harvestpulse_auth_farmer", JSON.stringify(updated));
+    setProfile(updated);
+
     setTimeout(() => {
-      setProfile({
-        ...profile,
-        name,
-        district,
-        soilType,
-        farmSize,
-        mobile,
-        aadhaar
-      });
       setSaving(false);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
-    }, 800);
+    }, 400);
   };
 
   // Safe SVG representation of verification QR-Code containing data string
-  const qrCodeMetadata = `HARVESTPULSE_VERIFIED:NAME=${name};DISTRICT=${district};SOIL=${soilType};SIZE=${farmSize};MOBILE=${mobile}`;
+  const qrCodeMetadata = `HARVESTPULSE_VERIFIED:NAME=${name || profile.name};DISTRICT=${district};SOIL=${soilType};SIZE=${farmSize}AC;ID=${profile.id || 'HP-FARM-04921'}`;
 
   const t = {
     English: {
-      title: "Farmer Profile & digital ID Card",
+      title: "Farmer Profile & Digital ID Card",
       subtitle: "Review your verified registry records, active crops, and soil types. Share the encrypted QR card below with depot agents for easy access.",
+      authenticatedBadge: "Authenticated Profile",
       formHeader: "Registry Details",
       nameLabel: "Full Name",
       districtLabel: "Cultivation District",
+      villageLabel: "Village / Taluk",
       soilLabel: "Soil Texture",
       farmSizeLabel: "Farm Size (Acres)",
-      mobileLabel: "Registered Mobile",
       aadhaarLabel: "Aadhaar Card Verification",
       saveBtn: "Save Profile",
-      qrHeader: "Uzhavan digital ID",
+      qrHeader: "HarvestPulse Digital ID",
       qrSub: "Present this QR at cooperative banks & seed depots to verify crop eligibility instantly.",
       statusVerified: "Verified Registry",
       toastSaved: "Profile saved successfully!",
@@ -61,15 +79,16 @@ export default function FarmerProfile({ language, profile, setProfile }: FarmerP
     Tamil: {
       title: "விவசாயி சுயவிவரம் & டிஜிட்டல் அட்டை",
       subtitle: "உங்கள் பதிவு ஆவணங்கள், பயிர்கள் மற்றும் மண் வகைகளை சரிபார்க்கவும். கூட்டுறவு சங்கங்களில் பயன்படுத்த கீழே உள்ள QR குறியீட்டை சமர்ப்பிக்கலாம்.",
+      authenticatedBadge: "உள்நுழைந்த சுயவிவரம்",
       formHeader: "சுயவிவர ஆவணங்கள்",
       nameLabel: "விவசாயி பெயர்",
       districtLabel: "சாகுபடி மாவட்டம்",
+      villageLabel: "கிராமம் / வட்டம்",
       soilLabel: "மண் வகை",
       farmSizeLabel: "விவசாய நிலத்தின் அளவு (ஏக்கர்)",
-      mobileLabel: "கைபேசி எண்",
       aadhaarLabel: "ஆதார் எண் சரிபார்ப்பு",
       saveBtn: "சுயவிவரத்தைச் சேமிக்க",
-      qrHeader: "உழவன் டிஜிட்டல் அட்டை",
+      qrHeader: "ஹார்வெஸ்ட்பல்ஸ் டிஜிட்டல் அட்டை",
       qrSub: "கூட்டுறவு சங்கங்கள் அல்லது உரம் விநியோக மையங்களில் இக்குறியீட்டை காட்டி தகுதியை உறுதிப்படுத்தலாம்.",
       statusVerified: "பதிவுபெற்ற விவசாயி",
       toastSaved: "சுயவிவரம் வெற்றிகரமாக சேமிக்கப்பட்டது!",
@@ -78,14 +97,32 @@ export default function FarmerProfile({ language, profile, setProfile }: FarmerP
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-        <h1 className="text-2xl font-bold font-display text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
-          <User className="text-emerald-600" />
-          {t.title}
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-          {t.subtitle}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold font-display text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
+            <User className="text-emerald-600" />
+            {t.title}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            {t.subtitle}
+          </p>
+        </div>
+
+        {/* Authenticated user badge */}
+        <div className="flex items-center gap-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 px-3.5 py-2 rounded-xl text-xs">
+          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            {(name || profile.name || "F").charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+              {t.authenticatedBadge}
+            </div>
+            <div className="font-bold text-slate-800 dark:text-slate-100 text-sm leading-tight">
+              {name || profile.name}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -109,13 +146,14 @@ export default function FarmerProfile({ language, profile, setProfile }: FarmerP
               />
             </div>
 
-            {/* Mobile */}
+            {/* Village / Taluk */}
             <div className="space-y-1">
-              <label className="text-slate-600 dark:text-slate-400 block">{t.mobileLabel}</label>
+              <label className="text-slate-600 dark:text-slate-400 block">{t.villageLabel}</label>
               <input 
                 type="text"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
+                value={village}
+                onChange={(e) => setVillage(e.target.value)}
+                placeholder="e.g. Papanasam, Alampatti"
                 className="w-full px-3.5 py-2 rounded-xl bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:text-slate-100"
               />
             </div>
@@ -252,7 +290,9 @@ export default function FarmerProfile({ language, profile, setProfile }: FarmerP
             </div>
             <div className="flex justify-between border-t border-white/5 pt-2.5">
               <span className="opacity-75">Registry Card ID:</span>
-              <span className="font-mono text-[10px] text-emerald-300">HP-TN-${mobile.slice(-4)}-${district.slice(0,3).toUpperCase()}</span>
+              <span className="font-mono text-[10px] text-emerald-300">
+                {profile.id || `HP-FARM-${district.slice(0,3).toUpperCase()}-${Math.round(farmSize * 10)}AC`}
+              </span>
             </div>
           </div>
 

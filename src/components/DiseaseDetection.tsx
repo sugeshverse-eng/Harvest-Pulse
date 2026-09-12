@@ -4,13 +4,89 @@ import { DiseaseDetectionResult } from "../types";
 
 interface DiseaseDetectionProps {
   language: 'English' | 'Tamil';
+  latestReport?: DiseaseDetectionResult | null;
+  onReportUpdate?: (report: DiseaseDetectionResult) => void;
 }
 
-export default function DiseaseDetection({ language }: DiseaseDetectionProps) {
+// Crisp sample SVG leaf data URLs for instantaneous demo testing
+const SAMPLE_LEAVES = [
+  {
+    nameEn: "Paddy Blast Disease",
+    nameTa: "நெல் குலை நோய்",
+    crop: "Paddy",
+    type: "blast",
+    dataUrl: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+        <rect width="100%" height="100%" fill="#1a2e1d"/>
+        <path d="M 50 260 C 120 180, 220 120, 360 40 C 320 120, 200 220, 70 280 Z" fill="#6b9c3e"/>
+        <!-- Spindle shaped diamond lesions with gray center and brown margin -->
+        <ellipse cx="160" cy="180" rx="28" ry="10" transform="rotate(-35 160 180)" fill="#78350f"/>
+        <ellipse cx="160" cy="180" rx="16" ry="5" transform="rotate(-35 160 180)" fill="#d6d3d1"/>
+        <ellipse cx="230" cy="130" rx="34" ry="12" transform="rotate(-35 230 130)" fill="#78350f"/>
+        <ellipse cx="230" cy="130" rx="20" ry="6" transform="rotate(-35 230 130)" fill="#cbd5e1"/>
+        <ellipse cx="290" cy="85" rx="22" ry="8" transform="rotate(-35 290 85)" fill="#92400e"/>
+        <ellipse cx="290" cy="85" rx="12" ry="4" transform="rotate(-35 290 85)" fill="#e2e8f0"/>
+        <!-- Central midrib vein -->
+        <path d="M 55 265 Q 200 160 355 45" stroke="#4d7c0f" stroke-width="3" fill="none"/>
+        <text x="20" y="35" fill="#fef08a" font-family="sans-serif" font-size="14" font-weight="bold">SAMPLE LEAF: Oryza Sativa with Magnaporthe Oryzae (Blast)</text>
+      </svg>
+    `)
+  },
+  {
+    nameEn: "Tomato Early Blight",
+    nameTa: "தக்காளி இலை கருகல்",
+    crop: "Tomato",
+    type: "blight",
+    dataUrl: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+        <rect width="100%" height="100%" fill="#18261e"/>
+        <!-- Serrated tomato leaflet -->
+        <path d="M 200 270 C 130 220, 70 170, 80 120 C 100 130, 130 90, 150 110 C 180 80, 210 110, 230 90 C 260 110, 310 130, 310 160 C 310 210, 260 250, 200 270 Z" fill="#4d7c0f"/>
+        <!-- Target board concentric ring necrotic lesions -->
+        <circle cx="160" cy="160" r="28" fill="#eab308" opacity="0.6"/>
+        <circle cx="160" cy="160" r="22" fill="#713f12"/>
+        <circle cx="160" cy="160" r="15" fill="#451a03"/>
+        <circle cx="160" cy="160" r="7" fill="#1c1917"/>
+        <circle cx="235" cy="195" r="24" fill="#ca8a04" opacity="0.6"/>
+        <circle cx="235" cy="195" r="18" fill="#78350f"/>
+        <circle cx="235" cy="195" r="10" fill="#292524"/>
+        <!-- Yellow halo around leaf tips -->
+        <path d="M 78 122 C 90 125, 95 145, 85 155 Z" fill="#eab308"/>
+        <text x="20" y="35" fill="#fef08a" font-family="sans-serif" font-size="14" font-weight="bold">SAMPLE LEAF: Solanum Lycopersicum (Alternaria Blight)</text>
+      </svg>
+    `)
+  },
+  {
+    nameEn: "Healthy Paddy Leaf",
+    nameTa: "ஆரோக்கியமான நெல் இலை",
+    crop: "Paddy",
+    type: "healthy",
+    dataUrl: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+        <rect width="100%" height="100%" fill="#064e3b"/>
+        <!-- Lush vibrant healthy green blade -->
+        <path d="M 50 260 C 120 180, 220 120, 360 40 C 320 120, 200 220, 70 280 Z" fill="#16a34a"/>
+        <path d="M 55 265 Q 200 160 355 45" stroke="#86efac" stroke-width="2.5" fill="none"/>
+        <path d="M 120 205 Q 160 170 190 145" stroke="#bbf7d0" stroke-width="1.2" stroke-dasharray="2,2" fill="none"/>
+        <path d="M 190 145 Q 240 105 275 80" stroke="#bbf7d0" stroke-width="1.2" stroke-dasharray="2,2" fill="none"/>
+        <text x="20" y="35" fill="#86efac" font-family="sans-serif" font-size="14" font-weight="bold">SAMPLE LEAF: Healthy Vibrant Photosynthetic Blade (Zero Defect)</text>
+      </svg>
+    `)
+  }
+];
+
+export default function DiseaseDetection({ language, latestReport, onReportUpdate }: DiseaseDetectionProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState("Paddy");
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<DiseaseDetectionResult | null>(null);
+  const [report, setReport] = useState<DiseaseDetectionResult | null>(latestReport || (() => {
+    try {
+      const saved = localStorage.getItem("harvestpulse_latest_disease_report");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })());
   const [error, setError] = useState<string | null>(null);
   const [cameraMode, setCameraMode] = useState(false);
 
@@ -143,7 +219,19 @@ export default function DiseaseDetection({ language }: DiseaseDetectionProps) {
       if (response.ok) {
         const data = await response.json();
         if (data.diseaseName) {
-          setReport(data);
+          const enriched: DiseaseDetectionResult = {
+            ...data,
+            crop,
+            imageUrl: selectedImage,
+            scannedAt: new Date().toISOString()
+          };
+          setReport(enriched);
+          try {
+            localStorage.setItem("harvestpulse_latest_disease_report", JSON.stringify(enriched));
+          } catch (e) {
+            console.error("Storage error:", e);
+          }
+          onReportUpdate?.(enriched);
         } else {
           throw new Error("Diagnosis failed. The image might not be clear.");
         }
@@ -279,10 +367,58 @@ export default function DiseaseDetection({ language }: DiseaseDetectionProps) {
             accept="image/*" 
             className="hidden" 
           />
+
+          {/* 1-Click Instant Sample Leaf Presets */}
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {language === "English" ? "Quick Sample Leaf Tests:" : "மாதிரி இலை சோதனைகள்:"}
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">1-Click Test</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {SAMPLE_LEAVES.map((sample) => (
+                <button
+                  key={sample.nameEn}
+                  type="button"
+                  onClick={() => {
+                    setSelectedImage(sample.dataUrl);
+                    setCrop(sample.crop);
+                    setReport(null);
+                    setError(null);
+                  }}
+                  className={`p-2 rounded-xl border text-left text-xs transition cursor-pointer flex flex-col justify-between gap-1.5 ${
+                    selectedImage === sample.dataUrl
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 shadow-xs"
+                      : "border-slate-200 dark:border-slate-800 hover:border-emerald-400 bg-white/50 dark:bg-slate-900/50"
+                  }`}
+                >
+                  <span className="font-extrabold text-[11px] text-slate-800 dark:text-slate-200 leading-tight">
+                    {language === "English" ? sample.nameEn : sample.nameTa}
+                  </span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    {sample.crop} • {sample.type === "healthy" ? "Healthy" : "Infected"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Results / Diagnostic Report panel (Col 7) */}
         <div className="lg:col-span-7 space-y-4">
+          {report && (
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/20 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 flex items-center justify-between shadow-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-bold">
+                  {language === "English"
+                    ? "Live Synced: Dashboard Crop Health Score updated automatically based on this scan."
+                    : "நேரலை இணைப்பு: இந்த பரிசோதனையின் அடிப்படையில் டாஷ்போர்டு பயிர் ஆரோக்கிய குறியீடு புதுப்பிக்கப்பட்டுள்ளது."}
+                </span>
+              </div>
+            </div>
+          )}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20 p-6 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-emerald-500/20">
               <RefreshCw className="w-12 h-12 text-emerald-600 animate-spin mb-3" />

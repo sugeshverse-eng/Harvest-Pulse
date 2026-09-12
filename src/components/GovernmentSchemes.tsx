@@ -24,12 +24,12 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
 
   const t = {
     English: {
-      title: "Government Schemes & Subsidies",
-      subtitle: "Filter and search active Central & Tamil Nadu State agrarian welfare programs, insurance benefits, and mechanical hire subsidies.",
+      title: "Agricultural Schemes & Subsidies",
+      subtitle: "Filter and search active Central & Regional agrarian welfare programs, insurance benefits, and farm equipment subsidies.",
       searchPlaceholder: "Search schemes, documents, or departments...",
       filterAll: "All Schemes",
-      filterCentral: "Central Govt",
-      filterState: "Tamil Nadu Govt",
+      filterCentral: "National Programs",
+      filterState: "State & Regional",
       filterBookmarks: "Bookmarked Only",
       eligibility: "Eligibility Criteria",
       docs: "Required Documents",
@@ -37,12 +37,12 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
       applyLink: "Direct Apply Online",
     },
     Tamil: {
-      title: "அரசு திட்டங்கள் & மானியங்கள்",
-      subtitle: "மத்திய மற்றும் தமிழ்நாடு மாநில அரசு விவசாய நலத்திட்டங்கள், பயிர் காப்பீடுகள் மற்றும் மானியங்களைத் தேடிப் பயன்பெறுக.",
+      title: "விவசாய திட்டங்கள் & மானியங்கள்",
+      subtitle: "மத்திய மற்றும் மாநில விவசாய நலத்திட்டங்கள், பயிர் காப்பீடுகள் மற்றும் மானியங்களைத் தேடிப் பயன்பெறுக.",
       searchPlaceholder: "திட்டங்கள், ஆவணங்கள் அல்லது துறைகளைத் தேடுக...",
       filterAll: "அனைத்து திட்டங்கள்",
-      filterCentral: "மத்திய அரசு",
-      filterState: "தமிழக அரசு",
+      filterCentral: "தேசிய திட்டங்கள்",
+      filterState: "மாநில திட்டங்கள்",
       filterBookmarks: "சேமிக்கப்பட்டவை",
       eligibility: "தகுதி வரம்புகள்",
       docs: "தேவையான ஆவணங்கள்",
@@ -51,7 +51,7 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
     }
   }[language];
 
-  // Highly realistic central and Tamil Nadu state government schemes
+  // Realistic central and regional agricultural schemes
   const schemesData: Scheme[] = [
     {
       id: "scheme1",
@@ -77,24 +77,24 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
     },
     {
       id: "scheme2",
-      title: "Tamil Nadu Free Agricultural Power Supply Scheme",
-      titleTa: "தமிழ்நாடு இலவச விவசாய மின்சாரத் திட்டம்",
-      type: "Tamil Nadu State",
-      description: "Provides 24/7 free electricity connection for agricultural irrigation pumpsets across Tamil Nadu.",
-      descriptionTa: "தமிழகம் முழுவதும் உள்ள விவசாய மின் மோட்டார் பம்ப்செட்டுகளுக்கு 24 மணி நேரமும் இலவச மின்சாரம் வழங்கும் திட்டம்.",
+      title: "Agricultural Solar Pump & Power Irrigation Scheme",
+      titleTa: "விவசாய பாசன மின்சார & சூரிய ஒளி பம்ப் திட்டம்",
+      type: "State",
+      description: "Provides subsidized solar pump sets and dedicated electricity connection for agricultural irrigation pumpsets.",
+      descriptionTa: "விவசாய மின் மோட்டார் மற்றும் சூரிய ஒளி பம்ப்செட்டுகளுக்கு மானியம் மற்றும் தடையில்லா மின்சாரம் வழங்கும் திட்டம்.",
       eligibility: [
-        "Registered farmers of Tamil Nadu who own cultivable land.",
-        "Must have a valid irrigation well or borewell.",
-        "Requires certification from local administrative officers."
+        "Registered farmers who own cultivable land with borewell/well facility.",
+        "Must have a valid irrigation well or water storage structure.",
+        "Requires certification from local agrarian administrative authorities."
       ],
       eligibilityTa: [
-        "விவசாய நிலம் வைத்துள்ள பதிவு பெற்ற தமிழக விவசாயிகள்.",
+        "விவசாய நிலம் வைத்துள்ள பதிவு பெற்ற விவசாயிகள்.",
         "முறையான கிணறு அல்லது ஆழ்துளை கிணறு வசதி இருக்க வேண்டும்.",
-        "வட்டார கிராம நிர்வாக அலுவலர் (VAO) சான்றிதழ் தேவை."
+        "வட்டார வேளாண் நிர்வாக அலுவலர் சான்றிதழ் தேவை."
       ],
-      requiredDocuments: ["Patta, Chitta, Adangal copy", "VAO Well/Pump Certificate", "Aadhaar Card", "TANGEDCO application slip"],
-      requiredDocumentsTa: ["பட்டா, சிட்டா, அடங்கல் நகல்", "கிணறு மற்றும் பம்ப் சான்றிதழ் (VAO)", "ஆதார் அட்டை", "மின்வாரிய விண்ணப்ப நகல்"],
-      applicationLink: "https://www.tangedco.org/",
+      requiredDocuments: ["Patta, Chitta, Adangal copy", "Well/Pump Certificate", "Aadhaar Card", "Application slip"],
+      requiredDocumentsTa: ["பட்டா, சிட்டா, அடங்கல் நகல்", "கிணறு மற்றும் பம்ப் சான்றிதழ்", "ஆதார் அட்டை", "விண்ணப்ப நகல்"],
+      applicationLink: "https://pmkusum.mnre.gov.in/",
       deadline: "Batch-wise waiting list allocation"
     },
     {
@@ -112,29 +112,29 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
         "அறிவிக்கப்பட்ட பகுதிகளில் அறிவிக்கப்பட்ட பயிர்களை பயிரிடும் அனைத்து விவசாயிகள்.",
         "குத்தகை மற்றும் கூட்டு விவசாயிகளும் இத்திட்டத்திற்கு தகுதியானவர்கள்."
       ],
-      requiredDocuments: ["Sowing Certificate (VAO Adangal)", "Land documents (Patta/Chitta)", "Bank account copy", "Aadhaar Card"],
+      requiredDocuments: ["Sowing Certificate (Adangal)", "Land documents (Patta/Chitta)", "Bank account copy", "Aadhaar Card"],
       requiredDocumentsTa: ["பயிர் சாகுபடி சான்றிதழ் (அடங்கல்)", "நில ஆவணங்கள் (பட்டா/சிட்டா)", "வங்கி கணக்கு புத்தக நகல்", "ஆதார் அட்டை"],
       applicationLink: "https://pmfby.gov.in/",
       deadline: "August 15, 2026 (Kharif batch)"
     },
     {
       id: "scheme4",
-      title: "Tamil Nadu Kuruvai Paddy Special Package Scheme",
-      titleTa: "தமிழக குறுவை சாகுபடி சிறப்பு தொகுப்பு திட்டம்",
-      type: "Tamil Nadu State",
-      description: "Subsidies on Paddy seeds, micronutrient fertilizers, and tractor hiring fees specifically for delta district farmers.",
-      descriptionTa: "காவிரி டெல்டா மாவட்ட விவசாயிகளுக்காக நெல் விதைகள், நுண்ணூட்ட உரங்கள் மற்றும் டிராக்டர் வாடகைக்கு வழங்கப்படும் சிறப்பு மானிய திட்டம்.",
+      title: "Paddy & Millets Modern Agritech Incentive Package",
+      titleTa: "நெல் & சிறுதானிய நவீன வேளாண் தொகுப்பு திட்டம்",
+      type: "State",
+      description: "Subsidies on certified high-yield seeds, micronutrient fertilizers, and mechanical equipment hiring fees.",
+      descriptionTa: "விவசாயிகளுக்காக சான்றளிக்கப்பட்ட விதைகள், நுண்ணூட்ட உரங்கள் மற்றும் உழவு இயந்திர வாடகைக்கு வழங்கப்படும் சிறப்பு மானிய திட்டம்.",
       eligibility: [
-        "Cultivating farmers in Thanjavur, Trichy, Tiruvarur, Nagapattinam, Cuddalore, and Pudukkottai districts.",
-        "Cultivating Paddy during the Kuruvai season."
+        "Cultivating farmers producing Paddy, Turmeric, Millets or pulses.",
+        "Registered digital farmer identity holder."
       ],
       eligibilityTa: [
-        "தஞ்சாவூர், திருச்சி, திருவாரூர், நாகை, கடலூர் மற்றும் புதுக்கோட்டை டெல்டா மாவட்ட விவசாயிகள்.",
-        "குறுவை பருவத்தில் நெல் சாகுபடி செய்யும் விவசாயி."
+        "நெல், மஞ்சள், சிறுதானியங்கள் பயிரிடும் விவசாயிகள்.",
+        "பதிவுசெய்யப்பட்ட டிஜிட்டல் விவசாய அடையாள அட்டை வைத்திருப்போர்."
       ],
-      requiredDocuments: ["Uzhavan App registration profile", "Adangal verification from VAO", "Bank details", "Aadhaar"],
-      requiredDocumentsTa: ["உழவன் செயலி பதிவு விவரங்கள்", "கிராம நிர்வாக அலுவலரின் அடங்கல் நகல்", "வங்கி விவரங்கள்", "ஆதார் அட்டை"],
-      applicationLink: "https://www.tnagrisnet.tn.gov.in/",
+      requiredDocuments: ["HarvestPulse Farmer Card / ID", "Cultivation proof (Adangal)", "Bank details", "Aadhaar"],
+      requiredDocumentsTa: ["HarvestPulse விவசாயி அட்டை", "சாகுபடி சான்றிதழ்", "வங்கி விவரங்கள்", "ஆதார் அட்டை"],
+      applicationLink: "https://agriwelfare.gov.in/",
       deadline: "August 30, 2026"
     }
   ];
@@ -149,7 +149,7 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
 
     const matchesType = filterType === "All" ||
                         (filterType === "Central" && scheme.type === "Central") ||
-                        (filterType === "State" && scheme.type === "Tamil Nadu State") ||
+                        (filterType === "State" && scheme.type === "State") ||
                         (filterType === "Bookmarks" && bookmarkedIds.includes(scheme.id));
 
     return matchesSearch && matchesType;
@@ -245,7 +245,7 @@ export default function GovernmentSchemes({ language }: GovernmentSchemesProps) 
                       ? "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300" 
                       : "bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300"
                   }`}>
-                    {scheme.type === "Central" ? "Central Govt" : "Tamil Nadu State Govt"}
+                    {scheme.type === "Central" ? "National Program" : "State & Regional"}
                   </span>
                   
                   <button 

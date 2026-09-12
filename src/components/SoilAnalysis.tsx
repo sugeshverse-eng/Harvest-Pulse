@@ -28,11 +28,11 @@ export default function SoilAnalysis({ language, userSoil }: SoilAnalysisProps) 
       phLabel: "Soil pH (Acidity)",
       micronutrients: "Micronutrients Deficiencies",
       buttonText: "Generate Soil Report",
-      loadingText: "Uzhavan AI calculating chemical balance sheets...",
+      loadingText: "HarvestPulse AI calculating chemical balance sheets...",
       npkChart: "NPK Distribution Metrics",
       recs: "Fertilizer Recommendations",
       organic: "Organic Restoration Suggestions",
-      aiReport: "AI Agronomic Soil Report",
+      aiReport: "HarvestPulse AI Agronomic Soil Report",
     },
     Tamil: {
       title: "மண் பரிசோதனை அறிக்கை",
@@ -44,11 +44,11 @@ export default function SoilAnalysis({ language, userSoil }: SoilAnalysisProps) 
       phLabel: "மண்ணின் அமிலத்தன்மை (pH)",
       micronutrients: "நுண்ணூட்டச் சத்து பற்றாக்குறை",
       buttonText: "மண் அறிக்கை பெறுக",
-      loadingText: "உழவன் AI மண் குறியீடுகளைக் கணக்கிடுகிறது...",
+      loadingText: "ஹார்வெஸ்ட்பல்ஸ் AI மண் குறியீடுகளைக் கணக்கிடுகிறது...",
       npkChart: "மண்ணின் ஊட்டச்சத்து நிலை",
       recs: "உர பரிந்துரைகள்",
       organic: "இயற்கை வழி மண் மேம்பாட்டு பரிந்துரைகள்",
-      aiReport: "உழவன் AI மண் தொழில்நுட்ப உரை",
+      aiReport: "ஹார்வெஸ்ட்பல்ஸ் AI மண் தொழில்நுட்ப உரை",
     }
   }[language];
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { 
   CloudSun, 
   TrendingUp, 
@@ -11,20 +11,112 @@ import {
   ChevronRight, 
   Droplets, 
   DollarSign, 
-  HelpCircle 
+  HelpCircle,
+  ShieldCheck,
+  Thermometer,
+  CloudRain,
+  Bot,
+  Mic,
+  FileCheck,
+  Camera,
+  MapPin
 } from "lucide-react";
-import { FarmerProfile, WeatherInfo, MarketPrice } from "../types";
+import { FarmerProfile, WeatherInfo, MarketPrice, DiseaseDetectionResult } from "../types";
 
 interface DashboardProps {
   profile: FarmerProfile;
   setActiveTab: (tab: string) => void;
   language: 'English' | 'Tamil';
+  latestDiseaseReport?: DiseaseDetectionResult | null;
 }
 
-export default function Dashboard({ profile, setActiveTab, language }: DashboardProps) {
+export default function Dashboard({ profile, setActiveTab, language, latestDiseaseReport }: DashboardProps) {
   const [weather, setWeather] = useState<WeatherInfo | null>(null);
   const [prices, setPrices] = useState<MarketPrice[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Dynamically calculate crop health score based on farmer's disease detector
+  const healthInfo = useMemo(() => {
+    if (!latestDiseaseReport) {
+      return {
+        score: 88,
+        statusEn: "Good (Baseline)",
+        statusTa: "நன்று (அடிப்படை குறியீடு)",
+        statusColor: "text-emerald-600 dark:text-emerald-400",
+        pingColor: "bg-emerald-500",
+        strokeColor: "text-emerald-500",
+        gaugeScoreText: "88",
+        isScanBased: false,
+        adviceEn: "Baseline score active. Use AI Disease Detector to scan crop leaves and get live health metrics.",
+        adviceTa: "அடிப்படை குறியீடு. நேரலை ஆரோக்கியக் குறியீட்டைப் பெற இலை நோய் கண்டறியும் கருவியைப் பயன்படுத்தவும்."
+      };
+    }
+
+    const nameLower = (latestDiseaseReport.diseaseName || "").toLowerCase();
+    const isHealthy = nameLower.includes("healthy") || nameLower.includes("no disease") || nameLower.includes("normal") || nameLower.includes("defect free");
+
+    if (isHealthy) {
+      return {
+        score: 96,
+        statusEn: "Excellent • Disease-Free",
+        statusTa: "செழிப்பானது • நோய் அற்றது",
+        statusColor: "text-emerald-600 dark:text-emerald-400",
+        pingColor: "bg-emerald-500",
+        strokeColor: "text-emerald-500",
+        gaugeScoreText: "96",
+        isScanBased: true,
+        adviceEn: `Latest ${latestDiseaseReport.crop || "crop"} leaf scan confirmed 100% disease-free. Growth is optimal.`,
+        adviceTa: `${latestDiseaseReport.crop || "பயிர்"} இலை சோதனையில் எவ்வித நோய் பாதிப்பும் இல்லை என உறுதியாகியுள்ளது.`
+      };
+    }
+
+    if (latestDiseaseReport.severity === "High") {
+      const score = Math.max(30, Math.min(50, Math.round(100 - (latestDiseaseReport.confidenceScore * 0.65))));
+      return {
+        score,
+        statusEn: "Critical Alert",
+        statusTa: "அதிதீவிர பாதிப்பு",
+        statusColor: "text-red-600 dark:text-red-400",
+        pingColor: "bg-red-500",
+        strokeColor: "text-red-500",
+        gaugeScoreText: String(score),
+        isScanBased: true,
+        adviceEn: `Urgent: ${latestDiseaseReport.diseaseName} detected (${latestDiseaseReport.confidenceScore}% confidence). Initiate immediate spray.`,
+        adviceTa: `கவனம்: தீவிர ${latestDiseaseReport.diseaseName} கண்டறியப்பட்டுள்ளது (${latestDiseaseReport.confidenceScore}% உறுதி). உடனடி சிகிச்சை தேவை.`
+      };
+    }
+
+    if (latestDiseaseReport.severity === "Medium") {
+      const score = Math.max(55, Math.min(74, Math.round(85 - (latestDiseaseReport.confidenceScore * 0.2))));
+      return {
+        score,
+        statusEn: "Moderate Risk",
+        statusTa: "கவனிக்கத்தக்க பாதிப்பு",
+        statusColor: "text-amber-600 dark:text-amber-400",
+        pingColor: "bg-amber-500",
+        strokeColor: "text-amber-500",
+        gaugeScoreText: String(score),
+        isScanBased: true,
+        adviceEn: `Moderate ${latestDiseaseReport.diseaseName} found. Apply recommended fungicide/treatment within 48 hours.`,
+        adviceTa: `மிதமான ${latestDiseaseReport.diseaseName} பதிவாகியுள்ளது. 48 மணி நேரத்திற்குள் பரிந்துரைத்த சிகிச்சையைத் தொடங்கவும்.`
+      };
+    }
+
+    // Low severity
+    const score = Math.max(78, Math.min(88, Math.round(92 - (latestDiseaseReport.confidenceScore * 0.1))));
+    return {
+      score,
+      statusEn: "Mild • Early Stage",
+      statusTa: "லேசான தொடக்க நிலை",
+      statusColor: "text-lime-600 dark:text-lime-400",
+      pingColor: "bg-lime-500",
+      strokeColor: "text-lime-500",
+      gaugeScoreText: String(score),
+      isScanBased: true,
+      adviceEn: `Early mild stage of ${latestDiseaseReport.diseaseName}. Eco-friendly organic spray is highly effective.`,
+      adviceTa: `${latestDiseaseReport.diseaseName} ஆரம்ப நிலையில் உள்ளது. இயற்கை முறை பூச்சி/நோய் கட்டுப்பாடு போதுமானது.`
+    };
+  }, [latestDiseaseReport]);
 
   useEffect(() => {
     async function fetchData() {
@@ -127,7 +219,7 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
   const recentActivities = [
     { id: "act1", action: language === "English" ? "Created Soil Analysis Report" : "மண் பரிசோதனை அறிக்கை உருவாக்கப்பட்டது", time: "2 hrs ago" },
     { id: "act2", action: language === "English" ? "Calculated Smart Irrigation quantity" : "நீர் தேவை கணக்கிடப்பட்டது", time: "1 day ago" },
-    { id: "act3", action: language === "English" ? "Enquired Uzhavan AI about Paddy yield" : "உழவன் AI-யிடம் நெல் விளைச்சல் பற்றி கேட்கப்பட்டது", time: "3 days ago" }
+    { id: "act3", action: language === "English" ? "Consulted Uzhavan AI Farmer on Paddy split dose" : "உழவன் AI விவசாயியிடம் நெல் உர அட்டவணை கேட்கப்பட்டது", time: "3 days ago" }
   ];
 
   return (
@@ -142,7 +234,7 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
         </div>
         <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm border border-white/20 flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-lime-300 animate-pulse" />
-          <span>Uzhavan Platform Connected</span>
+          <span>HarvestPulse V3 Active</span>
         </div>
       </div>
 
@@ -151,12 +243,20 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
         
         {/* Weather card */}
         <div className="p-6 rounded-2xl glass-card border border-emerald-500/10 shadow-lg flex flex-col justify-between">
-          <div className="flex justify-between items-center pb-4 border-b border-emerald-500/10">
-            <h2 className="font-display font-semibold text-lg text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
-              <CloudSun className="text-emerald-600 dark:text-emerald-400" />
-              {t.weatherTitle}
-            </h2>
-            <span className="text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
+          <div className="flex justify-between items-center pb-3 border-b border-emerald-500/10">
+            <div>
+              <h2 className="font-display font-semibold text-lg text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
+                <CloudSun className="text-emerald-600 dark:text-emerald-400" />
+                {t.weatherTitle}
+              </h2>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  Verified • Updated Daily
+                </span>
+              </div>
+            </div>
+            <span className="text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">
               {profile.district}
             </span>
           </div>
@@ -166,63 +266,85 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
             </div>
           ) : weather ? (
-            <div className="py-4 space-y-4">
+            <div className="py-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-5xl font-bold font-display text-emerald-900 dark:text-emerald-100">{weather.temp}°C</div>
-                  <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1">{weather.condition}</div>
+                  <div className="text-4xl font-bold font-display text-emerald-900 dark:text-emerald-100">{weather.temp}°C</div>
+                  <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    {language === "English" ? weather.condition : (weather.conditionTa || weather.condition)}
+                  </div>
+                  {weather.apparentTemp !== undefined && (
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5 flex items-center gap-1">
+                      <Thermometer className="w-3 h-3 text-emerald-600" />
+                      Feels like {weather.apparentTemp}°C
+                    </div>
+                  )}
                 </div>
-                <CloudSun className="w-14 h-14 text-amber-500 animate-pulse" />
+                <CloudSun className="w-12 h-12 text-amber-500 animate-pulse" />
               </div>
 
-              <div className="grid grid-cols-3 gap-2 bg-emerald-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-emerald-500/5">
+              <div className="grid grid-cols-3 gap-2 bg-emerald-50/50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-emerald-500/5">
                 <div className="text-center">
                   <div className="text-[10px] text-slate-500 uppercase font-semibold">{t.humidity}</div>
-                  <div className="text-sm font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{weather.humidity}%</div>
+                  <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{weather.humidity}%</div>
                 </div>
                 <div className="text-center">
                   <div className="text-[10px] text-slate-500 uppercase font-semibold">{t.rainProb}</div>
-                  <div className="text-sm font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{weather.rainProb}%</div>
+                  <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">
+                    {weather.rainProb}%
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-[10px] text-slate-500 uppercase font-semibold">{t.wind}</div>
-                  <div className="text-sm font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{weather.windSpeed} km/h</div>
+                  <div className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mt-0.5">{weather.windSpeed} km/h</div>
                 </div>
               </div>
 
-              <div className="text-xs bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 p-2.5 rounded-lg border border-red-200/50 dark:border-red-900/30 flex items-start gap-1.5">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{weather.alerts[0]}</span>
-              </div>
+              {weather.alerts && weather.alerts.length > 0 && (
+                <div className="text-xs bg-amber-50/70 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 p-2.5 rounded-lg border border-amber-200/50 dark:border-amber-900/30 flex items-start gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-600" />
+                  <span className="line-clamp-2 leading-relaxed font-medium">{weather.alerts[0]}</span>
+                </div>
+              )}
             </div>
           ) : (
             <div className="py-8 text-center text-slate-400 text-sm">Weather service unavailable</div>
           )}
 
-          <button 
-            onClick={() => setActiveTab("weather")}
-            className="w-full mt-2 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 rounded-xl transition flex items-center justify-center gap-1 border border-emerald-500/10"
-          >
-            {language === "English" ? "View 7-day Forecast" : "7 நாட்காட்டி வானிலை பார்க்க"}
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-2 mt-2">
+            <button 
+              onClick={() => setActiveTab("weather")}
+              className="flex-1 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 rounded-xl transition flex items-center justify-center gap-1 border border-emerald-500/10 cursor-pointer"
+            >
+              {language === "English" ? "View 7-day Forecast" : "7 நாட்காட்டி வானிலை"}
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setActiveTab("weather")}
+              className="px-2.5 py-2 text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition flex items-center gap-1 border border-blue-500/20 cursor-pointer"
+              title="Official Records for all 38 Districts"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+              <span>38 Districts</span>
+            </button>
+          </div>
         </div>
 
-        {/* Crop Health Score Card */}
+        {/* Crop Health Score Card - Directly Driven by Disease Detector */}
         <div className="p-6 rounded-2xl glass-card border border-emerald-500/10 shadow-lg flex flex-col justify-between">
           <div className="flex justify-between items-center pb-4 border-b border-emerald-500/10">
             <h2 className="font-display font-semibold text-lg text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
               <Activity className="text-emerald-600 dark:text-emerald-400" />
               {t.healthScore}
             </h2>
-            <span className="text-xs text-lime-600 dark:text-lime-400 font-semibold uppercase flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-lime-500 animate-ping" />
-              {t.cropHealthGood}
+            <span className={`text-xs font-semibold uppercase flex items-center gap-1.5 ${healthInfo.statusColor}`}>
+              <span className={`w-2 h-2 rounded-full ${healthInfo.pingColor} animate-ping`} />
+              {language === "English" ? healthInfo.statusEn : healthInfo.statusTa}
             </span>
           </div>
 
-          <div className="py-4 flex flex-col items-center justify-center">
-            {/* Visual Circular Gauge */}
+          <div className="py-3 flex flex-col items-center justify-center">
+            {/* Visual Circular Gauge with Dynamic Fill */}
             <div className="relative flex items-center justify-center w-36 h-36">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
@@ -242,28 +364,83 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray="351.8"
-                  strokeDashoffset="52.7" // 85% full (85/100 * 351.8)
-                  className="text-emerald-600 dark:text-emerald-400"
+                  strokeDashoffset={(351.8 - (healthInfo.score / 100) * 351.8).toFixed(1)}
+                  strokeLinecap="round"
+                  className={`${healthInfo.strokeColor} transition-all duration-700 ease-out`}
                 />
               </svg>
               <div className="absolute text-center">
-                <span className="text-4xl font-extrabold font-display text-emerald-900 dark:text-emerald-100">85</span>
+                <span className="text-4xl font-extrabold font-display text-emerald-950 dark:text-emerald-100">
+                  {healthInfo.gaugeScoreText}
+                </span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium">/ 100</span>
               </div>
             </div>
 
-            <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4 px-2">
-              {t.cropHealthSub}
-            </p>
+            {/* Disease Detector Linkage Status */}
+            {healthInfo.isScanBased && latestDiseaseReport ? (
+              <div className="w-full mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-left space-y-1.5">
+                <div className="flex items-center justify-between gap-1 text-[11px]">
+                  <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                    {latestDiseaseReport.crop || "Crop"}: {latestDiseaseReport.diseaseName}
+                  </span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    latestDiseaseReport.severity === "High" ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300" :
+                    latestDiseaseReport.severity === "Medium" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" :
+                    "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                  }`}>
+                    {latestDiseaseReport.severity}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                  <span>Confidence: {latestDiseaseReport.confidenceScore}%</span>
+                  <span>{latestDiseaseReport.recoveryTime || "7-10 Days"}</span>
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug line-clamp-2 italic">
+                  "{language === "English" ? healthInfo.adviceEn : healthInfo.adviceTa}"
+                </p>
+              </div>
+            ) : (
+              <div className="w-full mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-center">
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+                  {language === "English" ? "Baseline Index" : "அடிப்படை குறியீடு"}
+                </span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 px-1">
+                  {language === "English" ? healthInfo.adviceEn : healthInfo.adviceTa}
+                </p>
+              </div>
+            )}
           </div>
 
-          <button 
-            onClick={() => setActiveTab("disease")}
-            className="w-full py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 rounded-xl transition flex items-center justify-center gap-1 border border-emerald-500/10"
-          >
-            {language === "English" ? "Diagnose Crop Health" : "பயிர் ஆரோக்கியத்தை ஆய்வு செய்ய"}
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="space-y-1.5">
+            <button 
+              onClick={() => setActiveTab("disease")}
+              className="w-full py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100/60 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 rounded-xl transition flex items-center justify-center gap-1.5 border border-emerald-500/15 cursor-pointer"
+            >
+              {healthInfo.isScanBased ? (
+                <>
+                  <FileCheck className="w-3.5 h-3.5" />
+                  <span>{language === "English" ? "View Full Pathology Prescription" : "முழு நோய் மருந்துச் சீட்டைக் காண்க"}</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>{language === "English" ? "Scan Leaf to Update Score" : "இலை ஸ்கேன் செய்து குறியீட்டைப் பெறுக"}</span>
+                </>
+              )}
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+
+            {healthInfo.isScanBased && (
+              <button 
+                onClick={() => setActiveTab("disease")}
+                className="w-full py-1 text-[11px] font-semibold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Camera className="w-3 h-3" />
+                <span>{language === "English" ? "Scan Another Plant Leaf" : "மற்றொரு பயிர் இலையை ஸ்கேன் செய்"}</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Live Market Prices Card */}
@@ -379,6 +556,31 @@ export default function Dashboard({ profile, setActiveTab, language }: Dashboard
           </h2>
 
           <div className="grid grid-cols-2 gap-3">
+            <button 
+              onClick={() => setActiveTab("assistant")}
+              className="col-span-2 p-3 text-left rounded-xl bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 text-white shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-600 transition group cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-white/20">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold flex items-center gap-1.5">
+                      <span>{language === "English" ? "Uzhavan AI Farmer" : "உழவன் AI விவசாயி"}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-lime-400 text-emerald-950 font-extrabold">
+                        {language === "English" ? "Voice AI" : "குரல் AI"}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-emerald-100 mt-0.5">
+                      {language === "English" ? "TNAU Agronomist guidance & pathology" : "தமிழ்நாடு வேளாண் வழிகாட்டல் & நோய் தீர்வு"}
+                    </div>
+                  </div>
+                </div>
+                <Mic className="w-4 h-4 text-lime-300 animate-pulse" />
+              </div>
+            </button>
+
             <button 
               onClick={() => setActiveTab("recommendation")}
               className="p-3 text-left rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-900/50 transition group"
